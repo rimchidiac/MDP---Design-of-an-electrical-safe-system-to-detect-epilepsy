@@ -1,0 +1,33 @@
+import scipy.io as sio
+from sklearn.model_selection import train_test_split
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.preprocessing import StandardScaler
+from imblearn.over_sampling import RandomOverSampler
+from sklearn.metrics import classification_report
+
+d=sio.loadmat("MDP")
+data=d['NewData']
+X_1=data[:,:4]
+y_1=data[:,4]
+
+ros=RandomOverSampler(random_state=0)
+X,y=ros.fit_resample(X_1,y_1)
+
+X_train, X_test, y_train, y_test= train_test_split(X,y,random_state=0)
+
+scaler=StandardScaler()
+scaler.fit(X_train)
+X_train_scaled=scaler.transform(X_train)
+X_test_scaled=scaler.transform(X_test)
+
+clf=LinearDiscriminantAnalysis()
+clf.fit(X_train_scaled, y_train)
+
+y_pred=clf.predict(X_test_scaled)
+
+target_names=['class 0', 'class 1', 'class 2']
+print(classification_report(y_test, y_pred, target_names=target_names))
+
+print("accuracy:",clf.score(X_test_scaled,y_test))
+print(confusion_matrix(y_test,y_pred))
